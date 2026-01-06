@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Ark Grid Calculator — Expanded Edition</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-dark: #0f1115;
+    --bg-panel: rgba(26, 30, 36, 0.95);
+    --bg-input: #08090b;
+    --la-gold: #c2a076;
+    --la-gold-dim: #7d6b49;
+    --la-silver: #aebcd1;
+    --la-blue: #3d5e75;
+    --la-red: #5e3d3d;
+    --la-highlight: #ffebb8;
+    --text-main: #e1e6eb;
+    --text-muted: #8a96a3;
+    --text-gold: #e6cc9c;
+    --gap: 20px;
+  }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    margin: 0;
+    padding: 24px;
+    background-color: var(--bg-dark);
+    background-image: radial-gradient(circle at 50% 0%, #252a33 0%, #0f1115 80%);
+    color: var(--text-main);
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, .section-title, .res-title {
+    font-family: 'Cinzel', serif;
+    color: var(--text-gold);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    letter-spacing: 0.5px;
+  }
+  
+  h1 {
+    font-size: 28px;
+    text-align: center;
+    border-bottom: 1px solid var(--la-gold-dim);
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+    background: linear-gradient(to right, transparent, rgba(194, 160, 118, 0.1), transparent);
+  }
+
+  p.note {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-style: italic;
+    margin-bottom: 24px;
+  }
+
+  .page {
+    display: flex;
+    gap: var(--gap);
+    align-items: flex-start;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .half {
+    flex: 1;
+    min-width: 340px;
+    max-width: 600px;
+    padding: 20px;
+    border: 1px solid #333;
+    background: var(--bg-panel);
+    box-shadow: 0 0 20px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.05);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .half::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--la-gold-dim), transparent);
+  }
+
+  .left { border-top: 3px solid #8a4b4b; }
+  .right { border-top: 3px solid #4b6b8a; }
+
+  .section-title {
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .section-title::after { content:""; flex:1; height:1px; background: rgba(255,255,255,0.1); }
+
+  table { width: 100%; border-collapse: separate; border-spacing: 0 4px; margin-bottom: 16px; }
+  th { text-align: center; font-family: 'Cinzel', serif; color: var(--text-muted); font-size: 12px; text-transform: uppercase; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+  td { padding: 4px; text-align: center; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.03); }
+  tr:hover td { background: rgba(255,255,255,0.05); }
+
+  input[type=number], select {
+    background: var(--bg-input);
+    border: 1px solid #333;
+    color: var(--la-gold);
+    padding: 6px;
+    font-family: 'Lato', sans-serif;
+    text-align: center;
+    width: 60px;
+    transition: all 0.2s;
+  }
+  select { width: auto; min-width: 120px; text-align: left; }
+  input[type=number]:focus, select:focus { outline: none; border-color: var(--la-gold); box-shadow: 0 0 8px rgba(194, 160, 118, 0.2); }
+
+  label { font-size: 14px; color: var(--text-muted); cursor: pointer; }
+  
+  .core-config {
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(0,0,0,0.3); padding: 8px 12px;
+    border: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px;
+  }
+
+  button {
+    font-family: 'Cinzel', serif; padding: 10px 16px;
+    border: 1px solid var(--la-gold-dim);
+    background: linear-gradient(180deg, #2b2620 0%, #1a1712 100%);
+    color: var(--text-gold); cursor: pointer;
+    font-weight: 700; text-transform: uppercase; font-size: 12px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5); transition: all 0.2s; min-width: 120px;
+  }
+  button:hover {
+    background: linear-gradient(180deg, #3d362e 0%, #26221c 100%);
+    border-color: var(--la-gold); color: var(--la-highlight);
+    text-shadow: 0 0 5px var(--la-gold);
+  }
+
+  .panel-btn-row { margin-top: auto; padding-top: 16px; display: flex; justify-content: center; }
+  .panel-btn-row button { width: 100%; font-size: 14px; letter-spacing: 1px; }
+
+  .common-controls {
+    display: flex; justify-content: center; gap: 16px;
+    margin-top: 24px; margin-bottom: 12px; padding: 16px;
+    background: rgba(0,0,0,0.4);
+    border-top: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    flex-wrap: wrap;
+  }
+
+  button.secondary {
+    background: linear-gradient(180deg, #2a2e33 0%, #181a1d 100%);
+    border-color: #4a525c; color: var(--la-silver);
+  }
+  button.secondary:hover { border-color: var(--text-main); color: #fff; }
+
+  button.primary-gold {
+    background: linear-gradient(180deg, #5e3d3d 0%, #3a1f1f 100%); 
+    border-color: #8a4b4b; color: var(--la-highlight);
+    box-shadow: 0 0 10px rgba(138, 75, 75, 0.4);
+  }
+  button.primary-gold:hover {
+    background: linear-gradient(180deg, #7a4f4f 0%, #4f2a2a 100%);
+    box-shadow: 0 0 15px rgba(138, 75, 75, 0.6);
+  }
+
+  .small { font-size: 12px; color: var(--text-muted); margin-top: 8px; display: block; }
+
+  #resultsArea { margin-top: 20px; display: flex; gap: var(--gap); justify-content: center; flex-wrap: wrap; }
+  .results-half { flex: 1; min-width: 340px; max-width: 600px; background: var(--bg-panel); border: 1px solid #333; padding: 20px; position: relative; }
+  
+  .core-box {
+    margin-bottom: 16px; padding: 12px;
+    border: 1px solid #2a2e33;
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.2));
+    position: relative; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+  }
+  .core-box::before {
+    content:""; position:absolute; left:-4px; top:10px; bottom:10px; width:2px;
+    background: var(--la-gold-dim); opacity:0.5;
+  }
+  .core-header {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px;
+  }
+  .core-header strong { color: var(--la-highlight); font-family: 'Cinzel', serif; }
+  .gem-row {
+    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+    background: rgba(0,0,0,0.3); padding: 10px;
+    border-radius: 4px; border: 1px solid rgba(0,0,0,0.5);
+  }
+
+  .gem-card {
+    display: flex; flex-direction: column; gap: 4px; align-items: center; justify-content: center;
+    width: 80px; height: 70px; padding: 4px;
+    border: 1px solid rgba(255,255,255,0.1); color: #fff;
+    font-weight: 700; font-size: 14px; position: relative;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.4);
+    text-shadow: 0 1px 2px #000;
+  }
+  
+  /* Gem Colors - Updated Spectrum */
+  .gem-A { background: radial-gradient(circle at 30% 30%, #ff5252, #8a2b2b); border-color: #ff8a8a; } /* Red */
+  .gem-B { background: radial-gradient(circle at 30% 30%, #ff8c42, #8f4b16); border-color: #ffb580; } /* Orange */
+  .gem-C { background: radial-gradient(circle at 30% 30%, #ffd54f, #94720d); border-color: #ffe082; } /* Yellow */
+  .gem-D { background: radial-gradient(circle at 30% 30%, #9ccc65, #4a6624); border-color: #c5e1a5; } /* Light Green */
+  .gem-E { background: radial-gradient(circle at 30% 30%, #4caf50, #1b5e20); border-color: #81c784; } /* Green */
+  .gem-F { background: radial-gradient(circle at 30% 30%, #26a69a, #004d40); border-color: #80cbc4; } /* Teal */
+  .gem-G { background: radial-gradient(circle at 30% 30%, #29b6f6, #01579b); border-color: #81d4fa; } /* Light Blue */
+  .gem-H { background: radial-gradient(circle at 30% 30%, #3f51b5, #1a237e); border-color: #7986cb; } /* Indigo */
+  .gem-K { background: radial-gradient(circle at 30% 30%, #9c27b0, #4a148c); border-color: #ce93d8; } /* Purple */
+  .gem-L { background: radial-gradient(circle at 30% 30%, #78909c, #37474f); border-color: #b0bec5; } /* Silver/Grey */
+
+
+  .gem-type { font-size: 18px; font-family: 'Cinzel', serif; }
+  .gem-sub { font-size: 10px; font-weight: 400; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px; }
+  .badge { background: #000; color: var(--text-muted); padding: 4px 8px; border: 1px solid #333; font-size: 11px; display: inline-block; }
+  .remaining-badges { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
+
+  u/media (max-width: 900px) {
+    .page, #resultsArea { flex-direction: column; align-items: stretch; }
+    .half, .results-half { max-width: none; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Ark Grid Calculator</h1>
+<p class="note">Manage your nodes. Optimize your Ark Passive.</p>
+
+<div class="page">
+  <div class="half left">
+    <h2 class="section-title">Class Inventory</h2>
+    <table aria-label="Class inventory">
+      <thead><tr><th>Gem</th><th>Will</th><th>Pts</th><th>Qty</th></tr></thead>
+      <tbody>
+        <tr><td><span style="color:#ff5252">A</span></td><td>3</td><td>5</td><td><input id="class_A" type="number" min="0" value="0"></td></tr>
+        <tr><td><span style="color:#ff8c42">B</span></td><td>3</td><td>4</td><td><input id="class_B" type="number" min="0" value="0"></td></tr>
+        <tr><td><span style="color:#ffd54f">C</span></td><td>3</td><td>3</td><td><input id="class_C" type="number" min="0" value="0"></td></tr>
+        <tr><td><span style="color:#9ccc65">D</span></td><td>4</td><td>5</td><td><input id="class_D" type="number" min="0" value="0"></td></tr>
+        <tr><td><span style="color:#4caf50">E</span></td><td>4</td><td>4</td><td><input id="class_E" type="number" min="0" value="0"></td></tr>
+        <tr><td><span style="color:#26a69a">F</span></td><td>4</td><td>3</td><td><input id="class_F" type="number" min="0" value="0"></td></tr>
+        <tr><td><span style="color:#29b6f6">G</span></td><td>5</td><td>5</td><td><input id="class_G" type="number" min="0" value="0"></td></tr>
+        <tr><td><span style="color:#3f51b5">H</span></td><td>5</td><td>4</td><td><input id="class_H" type="number" min="0" value="0"></td></tr>
+        <tr><td><span style="color:#9c27b0">K</span></td><td>5</td><td>3</td><td><input id="class_K" type="number" min="0" value="0"></td></tr>
+        <tr><td><span style="color:#78909c">L</span></td><td>6</td><td>5</td><td><input id="class_L" type="number" min="0" value="0"></td></tr>
+      </tbody>
+    </table>
+
+    <div style="margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">
+      <label><input id="classAuto" type="checkbox" checked> Auto Target (20pts priority)</label>
+    </div>
+
+    <div id="class_core_config"></div>
+
+    <div class="panel-btn-row">
+      <button onclick="calculateClass()">Calculate</button>
+    </div>
+  </div>
+
+  <div class="half right">
+    <h2 class="section-title">General Inventory</h2>
+    <table aria-label="General inventory">
+      <thead><tr><th>Gem</th><th>Will</th><th>Pts</th><th>Qty</th></tr></thead>
+      <tbody>
+        <tr><td><span style="color:#ff5252">A</span></td><td>3</td><td>5</td><td><input id="general_A" type="number" min="0" value="0"></td></tr>
+        <tr><td><span style="color:#ff8c42">B</span></td><td>3</td><td>4</td><td><input id="general_B" type="number" min="0" value="0"></td></tr>
+        <tr><td><span style="color:#ffd54f">C</span></td><td>3</td><td>3</td><td><input id="general_C" type="number" min="0" value="0"></td></tr>
+        <tr><td><span style="color:#9ccc65">D</span></td><td>4</td><td>5</td><td><input id="general_D" type="number" min="0" value="0"></td></tr>
+        <tr><td><span style="color:#4caf50">E</span></td><td>4</td><td>4</td><td><input id="general_E" type="number" min="0" value="0"></td></tr>
+        <tr><td><span style="color:#26a69a">F</span></td><td>4</td><td>3</td><td><input id="general_F" type="number" min="0" value="0"></td></tr>
+        <tr><td><span style="color:#29b6f6">G</span></td><td>5</td><td>5</td><td><input id="general_G" type="number" min="0" value="0"></td></tr>
+        <tr><td><span style="color:#3f51b5">H</span></td><td>5</td><td>4</td><td><input id="general_H" type="number" min="0" value="0"></td></tr>
+        <tr><td><span style="color:#9c27b0">K</span></td><td>5</td><td>3</td><td><input id="general_K" type="number" min="0" value="0"></td></tr>
+        <tr><td><span style="color:#78909c">L</span></td><td>6</td><td>5</td><td><input id="general_L" type="number" min="0" value="0"></td></tr>
+      </tbody>
+    </table>
+
+    <div style="margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">
+      <label><input id="generalAuto" type="checkbox" checked> Auto Target (20pts priority)</label>
+    </div>
+
+    <div id="general_core_config"></div>
+
+    <div class="panel-btn-row">
+      <button onclick="calculateGeneral()">Calculate</button>
+    </div>
+  </div>
+</div>
+
+<div class="common-controls">
+  <button class="secondary" onclick="saveInventory()">Save Inventory</button>
+  <button class="secondary" onclick="loadInventory()">Load Inventory</button>
+  <div style="width:20px;"></div>
+  <button class="secondary" onclick="resetDefaults()">Reset Data</button>
+  <button class="primary-gold" onclick="calculateBoth()">Calculate Both</button>
+</div>
+
+<div id="resultsArea">
+  <div class="results-half" id="classResults">
+    <h3 class="res-title">Class Optimization</h3>
+    <div id="classResultsInner" class="small">Pending calculation...</div>
+  </div>
+
+  <div class="results-half" id="generalResults">
+    <h3 class="res-title">General Optimization</h3>
+    <div id="generalResultsInner" class="small">Pending calculation...</div>
+  </div>
+</div>
+
+<script>
+/* -------------------------
+   Constants & Logic
+   ------------------------- */
+const ASTROGEMS = {
+  A: { will: 3, points: 5 },
+  B: { will: 3, points: 4 },
+  C: { will: 3, points: 3 },
+  D: { will: 4, points: 5 },
+  E: { will: 4, points: 4 },
+  F: { will: 4, points: 3 },
+  G: { will: 5, points: 5 },
+  H: { will: 5, points: 4 },
+  K: { will: 5, points: 3 },
+  L: { will: 6, points: 5 }
+};
+const CORE_WILL = { Relic: 15, Ancient: 17 };
+const MAX_SLOTS = 4;
+const MAX_CORES = 3;
+
+// Weighted preference (Higher = better efficiency/utility)
+const GEM_WEIGHT = { 
+  A: 10, B: 9, C: 8, 
+  D: 7, E: 6, F: 5, 
+  G: 4, H: 3, K: 2, 
+  L: 1 
+};
+const TOP_N = 300; 
+
+/* -------------------------
+   UI builders
+   ------------------------- */
+function buildCoreConfig(containerId, prefix){
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  for(let i=1;i<=3;i++){
+    const div = document.createElement('div');
+    div.className = 'core-config';
+    div.id = `${prefix}_corecfg_${i}`;
+    div.innerHTML = `
+      <label>Core ${i} Type:
+        <select id="${prefix}_core${i}_rarity" style="color:${i===1?'#d48f45':'#e0e0e0'}">
+          <option value="Relic">Relic (15 WP)</option>
+          <option value="Ancient">Ancient (17 WP)</option>
+        </select>
+      </label>
+      <label class="target-wrap" id="${prefix}_core${i}_target_wrap">Target:
+        <select id="${prefix}_core${i}_target">
+          ${Array.from({length:11}, (_,k)=>10+k).map(v=>`<option value="${v}">${v}</option>`).join('')}
+        </select>
+      </label>
+    `;
+    container.appendChild(div);
+  }
+  const autoCheckbox = document.getElementById(prefix === 'class' ? 'classAuto' : 'generalAuto');
+  function updateVisibility(){
+    const hide = autoCheckbox.checked;
+    for(let i=1;i<=3;i++){
+      const wrap = document.getElementById(`${prefix}_core${i}_target_wrap`);
+      if(hide) wrap.style.display = 'none'; else wrap.style.display = 'inline-block';
+    }
+  }
+  autoCheckbox.addEventListener('change', updateVisibility);
+  updateVisibility();
+}
+
+/* -------------------------
+   Inventory helpers
+   ------------------------- */
+function readInventory(prefix){
+  const inv = {};
+  for(const t of Object.keys(ASTROGEMS)){
+    const el = document.getElementById(`${prefix}_${t}`);
+    inv[t] = Math.max(0, parseInt(el.value || '0'));
+  }
+  return inv;
+}
+function saveInventory(){
+  const data = { class: readInventory('class'), general: readInventory('general') };
+  localStorage.setItem('arkGridInventory_v5', JSON.stringify(data));
+  alert('Inventory saved to browser storage.');
+}
+function loadInventory(){
+  const raw = localStorage.getItem('arkGridInventory_v5');
+  if(!raw){ alert('No saved inventory found.'); return; }
+  try{
+    const obj = JSON.parse(raw);
+    for(const t of Object.keys(ASTROGEMS)){
+      if(obj.class && obj.class[t] !== undefined) document.getElementById(`class_${t}`).value = obj.class[t];
+      if(obj.general && obj.general[t] !== undefined) document.getElementById(`general_${t}`).value = obj.general[t];
+    }
+    alert('Inventory loaded.');
+  }catch(e){ alert('Failed to load inventory.'); }
+}
+function resetDefaults(){
+  const sides = ['class', 'general'];
+  const gems = Object.keys(ASTROGEMS);
+  sides.forEach(side => {
+    gems.forEach(gem => {
+      const el = document.getElementById(`${side}_${gem}`);
+      if(el) el.value = 0;
+    });
+  });
+  document.getElementById('classResultsInner').innerHTML = '<div class="small">Data reset.</div>';
+  document.getElementById('generalResultsInner').innerHTML = '<div class="small">Data reset.</div>';
+}
+
+/* -------------------------
+   Core combination generator
+   ------------------------- */
+function generateCoreCombos(inv, maxWill) {
+  const types = Object.keys(ASTROGEMS);
+  const results = [];
+  
+  function backtrack(start, combo, counts){
+    if(combo.length>0){
+      let will=0, points=0;
+      for(const t of combo){ will+=ASTROGEMS[t].will; points+=ASTROGEMS[t].points; }
+      if(will<=maxWill){
+        let pref=0; for(const t of combo) pref += (GEM_WEIGHT[t]||0);
+        results.push({ combo: combo.slice(), counts: {...counts}, will, points, prefScore: pref });
+      }
+    }
+    if(combo.length===MAX_SLOTS) return;
+    for(let i=start;i<types.length;i++){
+      const t = types[i];
+      const used = counts[t]||0;
+      if(used < (inv[t]||0)){
+        combo.push(t);
+        counts[t] = used+1;
+        backtrack(i, combo, counts);
+        combo.pop();
+        if(used===0) delete counts[t]; else counts[t]=used;
+      }
+    }
+  }
+  backtrack(0, [], {});
+
+  /* SMART SORT LOGIC: */
+  const byPoints = {};
+  for(const r of results) {
+    if(!byPoints[r.points]) byPoints[r.points] = [];
+    byPoints[r.points].push(r);
+  }
+
+  const finalResults = [];
+  // Process groups from highest points to lowest
+  Object.keys(byPoints).sort((a,b)=>b-a).forEach(pts => {
+    const group = byPoints[pts];
+    // Sort this group strictly by Willpower Ascending
+    group.sort((a,b) => a.will - b.will);
+    
+    // Take the best 100 (Most Efficient)
+    const efficient = group.slice(0, 100);
+    // Take the worst 50 (Least Efficient / Highest Will) - useful for Ancient cores
+    const inefficient = group.slice(-50).reverse();
+    
+    // Combine them (Set removes duplicates if list is small)
+    const combined = [...new Set([...efficient, ...inefficient])];
+    finalResults.push(...combined);
+  });
+
+  return finalResults;
+}
+
+/* -------------------------
+   Global optimizer for three cores
+   ------------------------- */
+function optimizeThreeCores(inv, coreConfigs, isAuto){
+  const perCoreMaxWill = coreConfigs.map(c=> CORE_WILL[c.rarity]);
+  const perCoreTarget = coreConfigs.map(c=> c.target || 20);
+
+  const combosPerCore = [];
+  for(let i=0;i<3;i++){ combosPerCore.push(generateCoreCombos(inv, perCoreMaxWill[i])); }
+
+  if(combosPerCore.some(list => list.length===0)) return { best: null, reason:'no-combos' };
+
+  // Use the larger TOP_N list to ensure coverage
+  const trimmed = combosPerCore.map(list => list.slice(0, TOP_N));
+
+  let best = null;
+
+  function fitsInventory(trioCounts, inventory){
+    for(const t of Object.keys(ASTROGEMS)){
+      if((trioCounts[t]||0) > (inventory[t]||0)) return false;
+    }
+    return true;
+  }
+
+  const caps = perCoreTarget.map(x=> Math.min(x||20, 20));
+
+  const list0 = trimmed[0], list1 = trimmed[1], list2 = trimmed[2];
+  
+  // Greedy optimization loop
+  for(let i0=0;i0<list0.length;i0++){
+    const c0 = list0[i0];
+    for(let i1=0;i1<list1.length;i1++){
+      const c1 = list1[i1];
+      
+      // Partial inventory check
+      const partial = {};
+      for(const t of Object.keys(c0.counts||{})) partial[t] = (partial[t]||0) + c0.counts[t];
+      for(const t of Object.keys(c1.counts||{})) partial[t] = (partial[t]||0) + c1.counts[t];
+      let ok01 = true;
+      for(const t of Object.keys(partial)) if(partial[t] > (inv[t]||0)){ ok01=false; break; }
+      if(!ok01) continue;
+
+      for(let i2=0;i2<list2.length;i2++){
+        const c2 = list2[i2];
+        const combined = {...partial};
+        for(const t of Object.keys(c2.counts||{})) combined[t] = (combined[t]||0) + c2.counts[t];
+        if(!fitsInventory(combined, inv)) continue;
+
+        const pts0 = Math.min(c0.points, caps[0]);
+        const pts1 = Math.min(c1.points, caps[1]);
+        const pts2 = Math.min(c2.points, caps[2]);
+        const totalPts = pts0 + pts1 + pts2;
+        const pref = (c0.prefScore||0) + (c1.prefScore||0) + (c2.prefScore||0);
+        const totalWill = (c0.will||0) + (c1.will||0) + (c2.will||0);
+
+        // Key: Max Core 1 > Max Core 2 > Max Core 3
+        const key = [-pts0, -pts1, -pts2, -totalPts, -pref, totalWill];
+
+        const candidate = { combos:[c0,c1,c2], counts: combined, ptsRaw:[c0.points,c1.points,c2.points], will:[c0.will,c1.will,c2.will], key };
+
+        if(!best) { best = candidate; continue; }
+        let better = false;
+        for(let k=0;k<key.length;k++){
+          if(key[k] < best.key[k]) { better = true; break; }
+          if(key[k] > best.key[k]) break;
+        }
+        if(better) best = candidate;
+      }
+    }
+  }
+  return { best };
+}
+
+function readCoreConfigs(prefix){
+  const arr=[];
+  const isAuto = document.getElementById(prefix === 'class' ? 'classAuto' : 'generalAuto').checked;
+  for(let i=1;i<=3;i++){
+    const rarity = document.getElementById(`${prefix}_core${i}_rarity`).value;
+    const target = isAuto ? 20 : parseInt(document.getElementById(`${prefix}_core${i}_target`).value);
+    arr.push({ rarity, target });
+  }
+  return arr;
+}
+
+function buildGemCards(combo){
+  return combo.map(t => {
+    const c = t.toUpperCase();
+    const info = ASTROGEMS[c];
+    return `<div class="gem-card gem-${c}"><div class="gem-type">${c}</div><div class="gem-sub">${info.points}★ ${info.will}W</div></div>`;
+  }).join('');
+}
+
+function computeRemaining(inv, used){
+  const rem = {};
+  for(const t of Object.keys(ASTROGEMS)) rem[t] = (inv[t]||0) - (used[t]||0);
+  return rem;
+}
+
+function renderResults(containerId, resultObj, inv){
+  const container = document.getElementById(containerId);
+  if(!resultObj || !resultObj.best){ container.innerHTML = `<div class="small">No valid combos found (or inventory empty).</div>`; return; }
+  const best = resultObj.best;
+  let html = '';
+  for(let i=0;i<3;i++){
+    const c = best.combos[i];
+    html += `<div class="core-box">
+      <div class="core-header"><div><strong>Core ${i+1}</strong> <span style="font-size:12px;color:#aaa">(${c.counts ? Object.values(c.counts).reduce((a,b)=>a+b,0) : c.combo.length} gems)</span></div>
+      <div class="small" style="color:#fff">WP: ${c.will} &nbsp;•&nbsp; Pts: ${c.points}</div></div>
+      <div class="gem-row">${buildGemCards(c.combo)}</div>
+    </div>`;
+  }
+  const remaining = computeRemaining(inv, best.counts);
+  const badges = Object.keys(remaining).filter(k=>remaining[k]>0).map(k => `<div class="badge">${k}: ${remaining[k]}</div>`).join('');
+  html += `<div style="padding:0 4px;margin-top:12px"><strong style="font-size:12px;color:#8a96a3;text-transform:uppercase;">Unused Gems</strong><div class="remaining-badges">${badges || '<span class="small">None</span>'}</div></div>`;
+  container.innerHTML = html;
+}
+
+function calculateClass(){
+  const inv = readInventory('class');
+  const cfg = readCoreConfigs('class');
+  const auto = document.getElementById('classAuto').checked;
+  const res = optimizeThreeCores(inv, cfg, auto);
+  renderResults('classResultsInner', res, inv);
+}
+
+function calculateGeneral(){
+  const inv = readInventory('general');
+  const cfg = readCoreConfigs('general');
+  const auto = document.getElementById('generalAuto').checked;
+  const res = optimizeThreeCores(inv, cfg, auto);
+  renderResults('generalResultsInner', res, inv);
+}
+
+function calculateBoth(){
+  calculateClass();
+  calculateGeneral();
+}
+
+window.onload = function(){
+  buildCoreConfig('class_core_config','class');
+  buildCoreConfig('general_core_config','general');
+  calculateBoth();
+};
+</script>
+</body>
+</html>
