@@ -329,7 +329,7 @@ const ASTROGEMS = {
   K: { will: 5, points: 3 },
   L: { will: 6, points: 5 }
 };
-const CORE_WILL = { Relic: 15, Ancient: 17 };
+const CORE_WILL = { Epic: 9, Legendary: 12, Relic: 15, Ancient: 17 };
 const MAX_SLOTS = 4;
 const MAX_CORES = 3;
 
@@ -354,7 +354,9 @@ function buildCoreConfig(containerId, prefix){
     div.id = `${prefix}_corecfg_${i}`;
     div.innerHTML = `
       <label>Core ${i} Type:
-        <select id="${prefix}_core${i}_rarity" style="color:${i===1?'#d48f45':'#e0e0e0'}">
+        <select id="${prefix}_core${i}_rarity" style="color:#d48f45">
+          <option value="Epic">Epic (9 WP)</option>
+          <option value="Legendary">Legendary (12 WP)</option>
           <option value="Relic">Relic (15 WP)</option>
           <option value="Ancient">Ancient (17 WP)</option>
         </select>
